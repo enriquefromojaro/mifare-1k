@@ -63,7 +63,7 @@ function emit(credit, transport, payMethod){
 	// for a max value of 15000, we need 2 bytes
 	var creditSTR = new ByteString('00 00', HEX).add(credit).toString(HEX);
 	print(creditSTR);
-	var macChain = creditSTR+today+transport+payMethod;
+	var macChain = creditSTR+today+transport+payMethod+emitterCode;
 	var mac = card.calcMAC(new ByteString(macChain, ASCII), serial);
 	
 	//We have to write the whole 16 bytes, not 4
