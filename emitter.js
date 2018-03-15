@@ -14,6 +14,8 @@ function emit(credit, transport, payMethod){
     if (credit > 150)
 	throw 'Credit must be 150 euros or less!!';
     credit = Math.floor(credit * 100);
+    
+    var emitterCode = 'EM0001';
     var card  = new Card();
     var atr = card.reset(Card.RESET_COLD);
     try{
@@ -52,6 +54,12 @@ function emit(credit, transport, payMethod){
 	resp = card.authenticateSector(8);
 	if(resp.status !== '9000')
 	    throw '[ERROR] Error authenticating against sector 8: ' + resp.status;
+	
+	// Writing emitter code (6 bytes)
+	resp = card.writeBlock(8, 0, new ByteString(emitterCode + 'PPPPPPPPPP', ASCII));
+	if (resp.status !== '9000')
+	    throw '[ERROR] Error writing emitter code in sectro 8 block 0: ' + resp.status;
+	
 	// for a max value of 15000, we need 2 bytes
 	var creditSTR = new ByteString('00 00', HEX).add(credit).toString(HEX);
 	print(creditSTR);
