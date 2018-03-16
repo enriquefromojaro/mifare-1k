@@ -64,7 +64,6 @@ Card.prototype.decrement = function(sector, block, value){
 Card.prototype.readValueBlock = function(sector, block){
     block = sector*4 + block;
     var resp = this.sendApdu(0xFF, 0xB1, 0, block, 0);
-    print(resp);
     return {data: resp, status: this.getStatus()};
 }
 
