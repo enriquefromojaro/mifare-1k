@@ -94,6 +94,14 @@ Card.prototype.fillMAC = function(mac){
     return new ByteString('68 C3 DB 5B 01 29', HEX).concat(mac).concat(new ByteString('63 65 5F E6 FC ED', HEX));
 }
 
+Card.prototype.composeCalcAndFillMAC = function(credit, emissionDate, transport, payMethod, emitter, serial){
+    // for a max value of 15000, we need 2 bytes
+    var creditSTR = new ByteString('00 00', HEX).add(credit).toString(HEX);
+    var macChain = creditSTR+emissionDate+transport+payMethod+emitter;
+    var mac = this.calcMAC(new ByteString(macChain, ASCII), serial);
+    return this.fillMAC(mac);
+}
+
 Utils = {
     numbers : {},
     bytes : {},
