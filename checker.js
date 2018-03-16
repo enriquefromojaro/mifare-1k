@@ -63,12 +63,8 @@ function check(){
 	
 	// for a max value of 15000, we need 2 bytes
 	credit = Math.floor(credit*100);
-	var creditSTR = new ByteString('00 00', HEX).add(credit).toString(HEX);
-	var macChain = creditSTR+emissionDate+transport+payMethod+emitter;
-	var mac = card.calcMAC(new ByteString(macChain, ASCII), serial);
 	
-	//We have to write the whole 16 bytes, not 4
-	mac = card.fillMAC(mac);
+	var mac = card.composeCalcAndFillMAC(credit, emissionDate, transport, payMethod, emitter, serial);
 	
 	if(!mac.equals(cardMAC))
 	    throw 'Invalid MAC!!!! This card is not valid!!'

@@ -61,13 +61,7 @@ function emit(credit, transport, payMethod){
 	    throw '[ERROR] Error writing emitter code in sectro 8 block 0: ' + resp.status;
 	
 	// for a max value of 15000, we need 2 bytes
-	var creditSTR = new ByteString('00 00', HEX).add(credit).toString(HEX);
-	print(creditSTR);
-	var macChain = creditSTR+today+transport+payMethod+emitterCode;
-	var mac = card.calcMAC(new ByteString(macChain, ASCII), serial);
-	
-	//We have to write the whole 16 bytes, not 4
-	mac = card.fillMAC(mac);
+	var mac = card.composeCalcAndFillMAC(credit, today, transport, payMethod, emitterCode, serial)
 	
 	// writing MAC
 	resp = card.writeBlock(8, 1, mac);
