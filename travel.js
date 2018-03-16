@@ -1,4 +1,5 @@
 load('utils.js')
+
 function travel(){
     amount = 80;
     var card  = new Card();
@@ -80,8 +81,40 @@ function travel(){
 	if (resp.status !== '9000')
 	    throw '[ERROR] Error writing mac in sectro 8 block 1: ' + resp.status;
 	
-	print('Done. have a nice trip!');
 	
+	// Writing travel info
+	var busCode = new ByteString('B001', ASCII)
+	var lineCode = new ByteString('L01', ASCII);
+	// date in UNIX timestamp
+	var now = ByteString.valueOf(Math.floor(new Date().getTime()/100));
+	var stopCode = new ByteString('S426', ASCII);
+	
+	// the structure is
+	// 3B     4B     5B    4B
+	// line | bus | date | stop
+	var travelInfo = lineCode.concat(busCode).concat(now).concat(stopCode);
+	
+	resp = card.increment(8, 2, 1);
+	if(resp.status !== '9000')
+	    throw '[ERROR] Error incrementing number of travels: ' + resp.status;
+	var travelCounter = card.readValueBlock(8, 2);
+	if(travelCounter.status === '9000')
+	    travelCounter = travelCounter.data.toUnsigned() -1 ;
+	else
+	    throw '[ERROR] Error reading number of travels';
+	
+	var block = travelCounter%8 + Math.floor((travelCounter%8)/3);
+	var logSector = 9 + Math.floor(block/4);
+	var logBlock = block%4
+	
+	resp = card.authenticateSector(logSector);
+	if(resp.status !== '9000')
+	    throw '[ERROR] Error authenticating against sector ' + logSector + ': ' + resp.status;
+	resp = card.writeBlock(logSector, logBlock, travelInfo);
+	if(resp.status !== '9000')
+	    throw '[ERROR] Error travel info for travel '+(travelCounter + 1)+' against sector ' + logSector + 'block '+logBlock+': ' + resp.status;
+	
+	print('Done. Have anice day! :)');
 	
     }catch(err){
 	print(err);
