@@ -68,6 +68,11 @@ function emit(credit, transport, payMethod){
 	if (resp.status !== '9000')
 	    throw '[ERROR] Error writing mac in sectro 8 block 1: ' + resp.status;
 	
+	// Setting the travel counter
+	resp = card.setAsValueBlock(8, 2, 0);
+	if(resp.status !== '9000')
+	    throw '[ERROR] writing travel counter in sectro 8 block 2: ' + resp.status;
+
 	print('Card emitted!!! You can take it now');
 	
     }catch(err){
